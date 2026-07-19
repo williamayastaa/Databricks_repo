@@ -1,5 +1,5 @@
 [project]
-name = "ventas_retail_william_barboza"
+name = "Dbasocciate_final_project"
 version = "0.0.1"
 authors = [{ name = "williamproduceryt@gmail.com" }]
 requires-python = ">=3.10,<3.13"
@@ -21,7 +21,7 @@ dev = [
 ]
 
 [project.scripts]
-main = "ventas_retail_william_barboza.main:main"
+main = "Dbasocciate_final_project.main:main"
 
 [build-system]
 requires = ["hatchling"]

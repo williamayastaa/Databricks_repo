@@ -8,10 +8,10 @@ from pyspark.sql.functions import col, sum
 
 
 @dp.table
-def sample_zones_ventas_retail_william_barboza():
+def sample_zones_Dbasocciate_final_project():
     # Read from the "sample_trips" table, then sum all the fares
     return (
-        spark.read.table(f"sample_trips_ventas_retail_william_barboza")
+        spark.read.table(f"sample_trips_Dbasocciate_final_project")
         .groupBy(col("pickup_zip"))
         .agg(sum("fare_amount").alias("total_fare"))
     )

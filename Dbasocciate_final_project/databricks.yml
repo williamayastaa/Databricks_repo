@@ -1,8 +1,8 @@
-# This is a Databricks asset bundle definition for ventas_retail_william_barboza.
+# This is a Databricks asset bundle definition for Dbasocciate_final_project.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
-  name: ventas_retail_william_barboza
-  uuid: b55de4ec-baa9-4cbd-9126-18116967213e
+  name: Dbasocciate_final_project
+  uuid: 97427d7e-c00a-4564-9a40-e5a3b8f047f2
 
 include:
   - resources/*.yml
@@ -25,7 +25,7 @@ targets:
     workspace:
       host: https://dbc-a2ba0f20-1e00.cloud.databricks.com
     variables:
-      catalog: workspace
+      catalog: proyecto_final
       schema: ${workspace.current_user.short_name}
   prod:
     mode: production
@@ -34,7 +34,7 @@ targets:
       # We explicitly deploy to /Workspace/Users/williamproduceryt@gmail.com to make sure we only have a single copy.
       root_path: /Workspace/Users/williamproduceryt@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: workspace
+      catalog: proyecto_final
       schema: prod
     permissions:
       - user_name: williamproduceryt@gmail.com
