@@ -1,8 +1,8 @@
-# This is a Databricks asset bundle definition for Dbasocciate_final_project.
+# This is a Declarative Automation Bundle definition for ventas_retail_william_barboza.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
-  name: Dbasocciate_final_project
-  uuid: 97427d7e-c00a-4564-9a40-e5a3b8f047f2
+  name: ventas_retail_william_barboza
+  uuid: 72eed26d-8441-43d0-8b60-df494097af9e
 
 include:
   - resources/*.yml
