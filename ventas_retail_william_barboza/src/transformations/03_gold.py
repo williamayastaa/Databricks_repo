@@ -4,17 +4,21 @@ from pyspark.sql.functions import (
     date_format, round as spark_round
 )
 
+# Leemos las variables de esquemas inyectadas desde el YAML
+silver_schema = spark.conf.get("silver_schema", "silver")
+gold_schema = spark.conf.get("gold_schema", "gold")
+
 # -------------------------------------------------------------------------
 # 1. GOLD: DIMENSIÓN CLIENTE
 # -------------------------------------------------------------------------
 @dp.table(
-    name="gold.dim_cliente",
+    name=f"{gold_schema}.dim_cliente",
     comment="Dimensión Cliente (Esquema Estrella) - 1 fila por cliente"
 )
 @dp.expect_or_fail("gold_pk_cliente_not_null", "customer_key IS NOT NULL")
 def dim_cliente():
     return (
-        spark.read.table("silver.clientes")
+        spark.read.table(f"{silver_schema}.clientes")
         .select(
             col("customer_id").alias("customer_key"),
             col("nombre"),
@@ -31,13 +35,13 @@ def dim_cliente():
 # 2. GOLD: DIMENSIÓN PRODUCTO
 # -------------------------------------------------------------------------
 @dp.table(
-    name="gold.dim_producto",
+    name=f"{gold_schema}.dim_producto",
     comment="Dimensión Producto (Esquema Estrella) - 1 fila por producto"
 )
 @dp.expect_or_fail("gold_pk_producto_not_null", "product_key IS NOT NULL")
 def dim_producto():
     return (
-        spark.read.table("silver.productos")
+        spark.read.table(f"{silver_schema}.productos")
         .select(
             col("product_id").alias("product_key"),
             col("nombre_producto"),
@@ -53,13 +57,13 @@ def dim_producto():
 # 3. GOLD: DIMENSIÓN FECHA
 # -------------------------------------------------------------------------
 @dp.table(
-    name="gold.dim_fecha",
+    name=f"{gold_schema}.dim_fecha",
     comment="Dimensión Fecha derivada de los pedidos"
 )
 @dp.expect_or_fail("gold_pk_fecha_not_null", "date_key IS NOT NULL")
 def dim_fecha():
     return (
-        spark.read.table("silver.pedidos")
+        spark.read.table(f"{silver_schema}.pedidos")
         .select("fecha_pedido")
         .distinct()
         .select(
@@ -77,15 +81,15 @@ def dim_fecha():
 # 4. GOLD: TABLA DE HECHOS - FACT_VENTAS
 # -------------------------------------------------------------------------
 @dp.table(
-    name="gold.fact_ventas",
+    name=f"{gold_schema}.fact_ventas",
     comment="Tabla de Hechos de Ventas - Grano por línea de detalle de pedido"
 )
 @dp.expect_or_fail("gold_fk_cliente_not_null", "customer_key IS NOT NULL")
 @dp.expect_or_fail("gold_fk_producto_not_null", "product_key IS NOT NULL")
 @dp.expect_or_drop("gold_monto_total_non_negative", "monto_total >= 0")
 def fact_ventas():
-    pedidos_df = spark.read.table("silver.pedidos")
-    detalle_df = spark.read.table("silver.detalle_pedidos")
+    pedidos_df = spark.read.table(f"{silver_schema}.pedidos")
+    detalle_df = spark.read.table(f"{silver_schema}.detalle_pedidos")
     
     return (
         detalle_df.join(pedidos_df, on="order_id", how="inner")

@@ -3,6 +3,7 @@ resources:
     ventas_retail_pipeline:
       name: "[${bundle.target}] Pipeline Ventas Retail - William Barboza"
       configuration:
+        catalog : ${var.catalog}
         bronze_schema: ${var.schema_bronze}
         silver_schema: ${var.schema_silver}
         gold_schema: ${var.schema_gold}

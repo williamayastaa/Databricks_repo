@@ -1,11 +1,15 @@
 from pyspark import pipelines as dp
 from pyspark.sql.functions import col, to_date, trim, lower
 
+# Leemos las variables de esquemas inyectadas desde el YAML
+bronze_schema = spark.conf.get("bronze_schema", "bronze")
+silver_schema = spark.conf.get("silver_schema", "silver")
+
 # -------------------------------------------------------------------------
 # 1. SILVER: CLIENTES
 # -------------------------------------------------------------------------
 @dp.table(
-    name="silver.clientes",
+    name=f"{silver_schema}.clientes",
     comment="Tabla Silver de clientes limpia con expectations de calidad"
 )
 @dp.expect_or_fail("pk_customer_id_not_null", "customer_id IS NOT NULL")
@@ -13,7 +17,7 @@ from pyspark.sql.functions import col, to_date, trim, lower
 @dp.expect_or_drop("valid_segmento", "segmento IN ('Retail', 'Premium')")
 def clientes():
     return (
-        spark.readStream.table("bronze.clientes_raw")
+        spark.readStream.table(f"{bronze_schema}.clientes_raw")
         .select(
             col("customer_id").cast("integer").alias("customer_id"),
             trim(col("nombre")).alias("nombre"),
@@ -30,7 +34,7 @@ def clientes():
 # 2. SILVER: PRODUCTOS
 # -------------------------------------------------------------------------
 @dp.table(
-    name="silver.productos",
+    name=f"{silver_schema}.productos",
     comment="Tabla Silver de productos con precios y stock validados"
 )
 @dp.expect_or_fail("pk_product_id_not_null", "product_id IS NOT NULL")
@@ -38,7 +42,7 @@ def clientes():
 @dp.expect("stock_non_negative", "stock_actual >= 0")
 def productos():
     return (
-        spark.readStream.table("bronze.productos_raw")
+        spark.readStream.table(f"{bronze_schema}.productos_raw")
         .select(
             col("product_id").cast("integer").alias("product_id"),
             trim(col("nombre_producto")).alias("nombre_producto"),
@@ -54,7 +58,7 @@ def productos():
 # 3. SILVER: PEDIDOS
 # -------------------------------------------------------------------------
 @dp.table(
-    name="silver.pedidos",
+    name=f"{silver_schema}.pedidos",
     comment="Tabla Silver de pedidos cabecera"
 )
 @dp.expect_or_fail("pk_order_id_not_null", "order_id IS NOT NULL")
@@ -62,7 +66,7 @@ def productos():
 @dp.expect("total_pedido_non_negative", "total_pedido >= 0")
 def pedidos():
     return (
-        spark.readStream.table("bronze.pedidos_raw")
+        spark.readStream.table(f"{bronze_schema}.pedidos_raw")
         .select(
             col("order_id").cast("integer").alias("order_id"),
             col("customer_id").cast("integer").alias("customer_id"),
@@ -77,7 +81,7 @@ def pedidos():
 # 4. SILVER: DETALLE_PEDIDOS
 # -------------------------------------------------------------------------
 @dp.table(
-    name="silver.detalle_pedidos",
+    name=f"{silver_schema}.detalle_pedidos",
     comment="Tabla Silver de detalle de pedidos"
 )
 @dp.expect_or_fail("pk_order_item_id_not_null", "order_item_id IS NOT NULL")
@@ -85,7 +89,7 @@ def pedidos():
 @dp.expect_or_drop("cantidad_positive", "cantidad > 0")
 def detalle_pedidos():
     return (
-        spark.readStream.table("bronze.detalle_pedidos_raw")
+        spark.readStream.table(f"{bronze_schema}.detalle_pedidos_raw")
         .select(
             col("order_item_id").cast("integer").alias("order_item_id"),
             col("order_id").cast("integer").alias("order_id"),
