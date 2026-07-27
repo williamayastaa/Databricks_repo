@@ -28,6 +28,7 @@
         "  d.mes,\n",
         "  d.nombre_mes,\n",
         "  d.dia_semana,\n",
+        "  d.dia,\n",
         "  d.trimestre\n",
         "FROM\n",
         "  proyecto_final.gold.fact_ventas f\n",
@@ -37,63 +38,6 @@
         "      ON f.customer_key = c.customer_key\n",
         "    LEFT JOIN proyecto_final.gold.dim_fecha d\n",
         "      ON f.date_key = d.date_key"
-      ],
-      "parameters": [
-        {
-          "displayName": "Date Range",
-          "keyword": "date_range",
-          "dataType": "DATE",
-          "complexType": "RANGE",
-          "defaultSelection": {
-            "range": {
-              "dataType": "DATE",
-              "min": {
-                "value": "now-30d/d"
-              },
-              "max": {
-                "value": "now/d"
-              }
-            }
-          }
-        },
-        {
-          "displayName": "Sales Channel",
-          "keyword": "canal_venta_filter",
-          "dataType": "STRING",
-          "complexType": "MULTI",
-          "defaultSelection": {
-            "values": {
-              "dataType": "STRING",
-              "values": [
-                {
-                  "value": "web"
-                },
-                {
-                  "value": "app_movil"
-                },
-                {
-                  "value": "tienda_fisica"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "displayName": "Order Status",
-          "keyword": "estado_filter",
-          "dataType": "STRING",
-          "complexType": "MULTI",
-          "defaultSelection": {
-            "values": {
-              "dataType": "STRING",
-              "values": [
-                {
-                  "value": "completado"
-                }
-              ]
-            }
-          }
-        }
       ],
       "columns": [
         {
@@ -703,7 +647,11 @@
                   "format": {
                     "type": "number-currency",
                     "currencyCode": "USD",
-                    "abbreviation": "compact"
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
                   }
                 }
               },
@@ -777,71 +725,6 @@
             "width": 6,
             "height": 6
           }
-        },
-        {
-          "widget": {
-            "name": "category_summary",
-            "queries": [
-              {
-                "name": "main_query",
-                "query": {
-                  "datasetName": "sales_main",
-                  "fields": [
-                    {
-                      "name": "categoria",
-                      "expression": "`categoria`"
-                    },
-                    {
-                      "name": "measure(Total Revenue)",
-                      "expression": "MEASURE(`Total Revenue`)"
-                    },
-                    {
-                      "name": "measure(Total Units Sold)",
-                      "expression": "MEASURE(`Total Units Sold`)"
-                    },
-                    {
-                      "name": "measure(Total Orders)",
-                      "expression": "MEASURE(`Total Orders`)"
-                    }
-                  ],
-                  "disaggregated": false
-                }
-              }
-            ],
-            "spec": {
-              "version": 2,
-              "frame": {
-                "title": "Category Performance Summary",
-                "showTitle": true
-              },
-              "widgetType": "table",
-              "encodings": {
-                "columns": [
-                  {
-                    "fieldName": "categoria"
-                  },
-                  {
-                    "fieldName": "measure(Total Revenue)"
-                  },
-                  {
-                    "fieldName": "measure(Total Units Sold)"
-                  },
-                  {
-                    "fieldName": "measure(Total Orders)"
-                  }
-                ]
-              },
-              "data": {
-                "queryName": "main_query"
-              }
-            }
-          },
-          "position": {
-            "x": 0,
-            "y": 28,
-            "width": 12,
-            "height": 6
-          }
         }
       ],
       "pageType": "PAGE_TYPE_CANVAS",
@@ -853,19 +736,19 @@
       "layout": [
         {
           "widget": {
-            "name": "filter_date",
+            "name": "filter_anio",
             "queries": [
               {
-                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_date_key",
+                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_anio",
                 "query": {
                   "datasetName": "sales_main",
                   "fields": [
                     {
-                      "name": "date_key",
-                      "expression": "`date_key`"
+                      "name": "anio",
+                      "expression": "`anio`"
                     },
                     {
-                      "name": "date_key_associativity",
+                      "name": "anio_associativity",
                       "expression": "COUNT_IF(`associative_filter_predicate_group`)"
                     }
                   ],
@@ -876,15 +759,15 @@
             "spec": {
               "version": 2,
               "frame": {
-                "title": "Date Range",
+                "title": "Año",
                 "showTitle": true
               },
-              "widgetType": "filter-date-range-picker",
+              "widgetType": "filter-multi-select",
               "encodings": {
                 "fields": [
                   {
-                    "fieldName": "date_key",
-                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_date_key"
+                    "fieldName": "anio",
+                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_anio"
                   }
                 ]
               }
@@ -892,6 +775,98 @@
           },
           "position": {
             "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_mes",
+            "queries": [
+              {
+                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_mes",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "mes",
+                      "expression": "`mes`"
+                    },
+                    {
+                      "name": "mes_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Mes",
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "mes",
+                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_mes"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_dia",
+            "queries": [
+              {
+                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_dia",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "dia",
+                      "expression": "`dia`"
+                    },
+                    {
+                      "name": "dia_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Día",
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "dia",
+                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_dia"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 8,
             "y": 0,
             "width": 4,
             "height": 4
@@ -937,9 +912,9 @@
             }
           },
           "position": {
-            "x": 4,
-            "y": 0,
-            "width": 4,
+            "x": 0,
+            "y": 4,
+            "width": 6,
             "height": 4
           }
         },
@@ -983,9 +958,9 @@
             }
           },
           "position": {
-            "x": 8,
-            "y": 0,
-            "width": 4,
+            "x": 6,
+            "y": 4,
+            "width": 6,
             "height": 4
           }
         }

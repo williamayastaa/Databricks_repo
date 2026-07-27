@@ -12,7 +12,6 @@ resources:
         - glob:
             include: ../src/transformations/**
 
-      schema: default
       continuous: false
       development: true
       photon: true
