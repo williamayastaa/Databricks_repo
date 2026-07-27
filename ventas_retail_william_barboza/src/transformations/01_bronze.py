@@ -37,7 +37,7 @@ def clientes_raw():
 def productos_raw():
     return (
         spark.readStream
-        .format("cloudFiles")
+        .format("cloudFiles")   
         .option("cloudFiles.format", "csv")
         .option("header", "true")
         .option("inferSchema", "true")

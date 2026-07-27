@@ -17,5 +17,6 @@ resources:
       photon: true
       channel: CURRENT
       catalog: ${var.catalog}
+      schema: default 
       serverless: true
       root_path: ../src
