@@ -1,0 +1,21 @@
+resources:
+  pipelines:
+    ventas_retail_pipeline:
+      name: "[${bundle.target}] Pipeline Ventas Retail - William Barboza"
+      configuration:
+        bronze_schema: ${var.schema_bronze}
+        silver_schema: ${var.schema_silver}
+        gold_schema: ${var.schema_gold}
+
+      libraries:
+        - glob:
+            include: ../src/transformations/**
+
+      schema: default
+      continuous: false
+      development: true
+      photon: true
+      channel: CURRENT
+      catalog: ${var.catalog}
+      serverless: true
+      root_path: ../src

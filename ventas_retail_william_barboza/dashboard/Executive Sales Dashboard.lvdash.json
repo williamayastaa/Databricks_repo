@@ -1,0 +1,1003 @@
+{
+  "datasets": [
+    {
+      "name": "sales_main",
+      "displayName": "Sales Main Dataset",
+      "queryLines": [
+        "SELECT\n",
+        "  f.sales_item_key,\n",
+        "  f.order_id,\n",
+        "  f.customer_key,\n",
+        "  f.product_key,\n",
+        "  f.date_key,\n",
+        "  f.canal_venta,\n",
+        "  f.estado_pedido,\n",
+        "  f.cantidad,\n",
+        "  f.precio_unitario,\n",
+        "  f.descuento,\n",
+        "  f.monto_total,\n",
+        "  p.nombre_producto,\n",
+        "  p.categoria,\n",
+        "  p.subcategoria,\n",
+        "  c.nombre,\n",
+        "  c.apellido,\n",
+        "  c.ciudad,\n",
+        "  c.pais,\n",
+        "  c.segmento,\n",
+        "  d.anio,\n",
+        "  d.mes,\n",
+        "  d.nombre_mes,\n",
+        "  d.dia_semana,\n",
+        "  d.trimestre\n",
+        "FROM\n",
+        "  proyecto_final.gold.fact_ventas f\n",
+        "    LEFT JOIN proyecto_final.gold.dim_producto p\n",
+        "      ON f.product_key = p.product_key\n",
+        "    LEFT JOIN proyecto_final.gold.dim_cliente c\n",
+        "      ON f.customer_key = c.customer_key\n",
+        "    LEFT JOIN proyecto_final.gold.dim_fecha d\n",
+        "      ON f.date_key = d.date_key"
+      ],
+      "parameters": [
+        {
+          "displayName": "Date Range",
+          "keyword": "date_range",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "now-30d/d"
+              },
+              "max": {
+                "value": "now/d"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "Sales Channel",
+          "keyword": "canal_venta_filter",
+          "dataType": "STRING",
+          "complexType": "MULTI",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "web"
+                },
+                {
+                  "value": "app_movil"
+                },
+                {
+                  "value": "tienda_fisica"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "Order Status",
+          "keyword": "estado_filter",
+          "dataType": "STRING",
+          "complexType": "MULTI",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "completado"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "columns": [
+        {
+          "displayName": "Total Revenue",
+          "description": "Total revenue from all orders",
+          "expression": "SUM(monto_total)"
+        },
+        {
+          "displayName": "Total Orders",
+          "description": "Count of unique orders",
+          "expression": "COUNT(DISTINCT order_id)"
+        },
+        {
+          "displayName": "Total Units Sold",
+          "description": "Total quantity of items sold",
+          "expression": "SUM(cantidad)"
+        },
+        {
+          "displayName": "Average Order Value",
+          "description": "Average revenue per order",
+          "expression": "SUM(monto_total) * 1.0 / COUNT(DISTINCT order_id)"
+        },
+        {
+          "displayName": "Active Customers",
+          "description": "Count of unique customers",
+          "expression": "COUNT(DISTINCT customer_key)"
+        }
+      ],
+      "catalog": "proyecto_final",
+      "schema": "gold"
+    }
+  ],
+  "pages": [
+    {
+      "name": "b204076d",
+      "displayName": "Sales Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "kpi_revenue",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Revenue",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Total Revenue)",
+                  "rowNumber": 0,
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue Over Time",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date_key",
+                  "displayName": "date_key",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(Total Revenue)",
+                  "displayName": "Total Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "top_products",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    },
+                    {
+                      "name": "nombre_producto",
+                      "expression": "`nombre_producto`"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 10 Products by Revenue",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(Total Revenue)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "nombre_producto",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure",
+                      "measure": {
+                        "fieldName": "measure(Total Revenue)"
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "top_categories",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    },
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top Categories by Revenue",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(Total Revenue)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "categoria",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure",
+                      "measure": {
+                        "fieldName": "measure(Total Revenue)"
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 15,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "channel_revenue",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "canal_venta",
+                      "expression": "`canal_venta`"
+                    },
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Sales by Channel",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "canal_venta",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(Total Revenue)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "canal_venta",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "revenue_city",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    },
+                    {
+                      "name": "ciudad",
+                      "expression": "`ciudad`"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue by City",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(Total Revenue)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "ciudad",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure",
+                      "measure": {
+                        "fieldName": "measure(Total Revenue)"
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 22,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_orders",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Orders)",
+                      "expression": "MEASURE(`Total Orders`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Orders",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Total Orders)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "customers_city",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Active Customers)",
+                      "expression": "MEASURE(`Active Customers`)"
+                    },
+                    {
+                      "name": "ciudad",
+                      "expression": "`ciudad`"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "MEASURE(`Active Customers`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Active Customers by City",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(Active Customers)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "ciudad",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "measure",
+                      "measure": {
+                        "fieldName": "measure(Active Customers)"
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 22,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_units",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Units Sold)",
+                      "expression": "MEASURE(`Total Units Sold`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Units Sold",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Total Units Sold)",
+                  "rowNumber": 0
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_aov",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Average Order Value)",
+                      "expression": "MEASURE(`Average Order Value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Average Order Value",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Average Order Value)",
+                  "rowNumber": 0,
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "order_status_pie",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "measure(Total Orders)",
+                      "expression": "MEASURE(`Total Orders`)"
+                    },
+                    {
+                      "name": "estado_pedido",
+                      "expression": "`estado_pedido`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Order Status Distribution",
+                "showTitle": true
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(Total Orders)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none"
+                  }
+                },
+                "color": {
+                  "fieldName": "estado_pedido",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 9,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "category_summary",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    },
+                    {
+                      "name": "measure(Total Revenue)",
+                      "expression": "MEASURE(`Total Revenue`)"
+                    },
+                    {
+                      "name": "measure(Total Units Sold)",
+                      "expression": "MEASURE(`Total Units Sold`)"
+                    },
+                    {
+                      "name": "measure(Total Orders)",
+                      "expression": "MEASURE(`Total Orders`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Category Performance Summary",
+                "showTitle": true
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "categoria"
+                  },
+                  {
+                    "fieldName": "measure(Total Revenue)"
+                  },
+                  {
+                    "fieldName": "measure(Total Units Sold)"
+                  },
+                  {
+                    "fieldName": "measure(Total Orders)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 28,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "global_filters",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "filter_date",
+            "queries": [
+              {
+                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_date_key",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Date Range",
+                "showTitle": true
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_date_key"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_canal",
+            "queries": [
+              {
+                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_canal_venta",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "canal_venta",
+                      "expression": "`canal_venta`"
+                    },
+                    {
+                      "name": "canal_venta_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Sales Channel",
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "canal_venta",
+                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_canal_venta"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_estado",
+            "queries": [
+              {
+                "name": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_estado_pedido",
+                "query": {
+                  "datasetName": "sales_main",
+                  "fields": [
+                    {
+                      "name": "estado_pedido",
+                      "expression": "`estado_pedido`"
+                    },
+                    {
+                      "name": "estado_pedido_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Order Status",
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "estado_pedido",
+                    "queryName": "dashboards/01f1889c8ff4165ba1675bf6cb8eb512/datasets/01f189920cdd1cc9b6de55611243a512_estado_pedido"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

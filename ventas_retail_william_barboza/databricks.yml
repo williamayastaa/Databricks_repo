@@ -1,5 +1,4 @@
-# This is a Declarative Automation Bundle definition for ventas_retail_william_barboza.
-# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+# Definición del Bundle para ventas_retail_william_barboza
 bundle:
   name: ventas_retail_william_barboza
   uuid: 72eed26d-8441-43d0-8b60-df494097af9e
@@ -7,35 +6,42 @@ bundle:
 include:
   - resources/*.yml
 
-# Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
   catalog:
-    description: The catalog to use
-  schema:
-    description: The schema to use
+    description: El catálogo principal en Unity Catalog
+    default: proyecto_final
+  schema_bronze:
+    description: Esquema para la capa Bronze
+    default: bronze
+  schema_silver:
+    description: Esquema para la capa Silver
+    default: silver
+  schema_gold:
+    description: Esquema para la capa Gold
+    default: gold
 
 targets:
   dev:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
     workspace:
       host: https://dbc-a2ba0f20-1e00.cloud.databricks.com
     variables:
       catalog: proyecto_final
-      schema: ${workspace.current_user.short_name}
+      schema_bronze: bronze
+      schema_silver: silver
+      schema_gold: gold
+
   prod:
     mode: production
     workspace:
       host: https://dbc-a2ba0f20-1e00.cloud.databricks.com
-      # We explicitly deploy to /Workspace/Users/williamproduceryt@gmail.com to make sure we only have a single copy.
       root_path: /Workspace/Users/williamproduceryt@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: proyecto_final
-      schema: prod
+      schema_bronze: bronze
+      schema_silver: silver
+      schema_gold: gold
     permissions:
       - user_name: williamproduceryt@gmail.com
         level: CAN_MANAGE

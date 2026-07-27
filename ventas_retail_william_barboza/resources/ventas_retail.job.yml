@@ -1,0 +1,15 @@
+resources:
+  jobs:
+    ventas_retail_job:
+      name: "[${bundle.target}] Job Orquestador Ventas Retail"
+
+      tasks:
+        - task_key: run_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.ventas_retail_pipeline.id}
+            full_refresh: false
+
+      schedule:
+        quartz_cron_expression: "0 0 12 * * ?"
+        timezone_id: "America/Lima"
+        pause_status: PAUSED
